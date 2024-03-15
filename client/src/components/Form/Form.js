@@ -1,12 +1,13 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Typography, TextField, Button, Paper } from '@material-ui/core';
 import useStyles from "./styles";
 import FileBase from 'react-file-base64';
 import { useDispatch } from 'react-redux';
-import { createPost } from "../../actions/posts";
+import { createPost, updatePost } from "../../actions/posts";
+import { useSelector } from 'react-redux';
 
-const Form = () => {
+const Form = ({ currentId, setCurrentId }) => {
 
     const [postData, setPostData] = useState({
         creator: '',
@@ -15,13 +16,26 @@ const Form = () => {
         tags: '',
         selectedFile: ''
     });
-
+    const post = useSelector((state) => currentId ? state.posts.find((p) => p._id === currentId) : null);
     const dispatch = useDispatch();
-
     const classes = useStyles();
+
+    useEffect(() => {
+        if (post) {
+            setPostData(post)
+        }
+    }, [post]);
+
+   
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        if (currentId) {
+            dispatch(updatePost(currentId, postData));
+        } else {
+            dispatch(createPost(postData));
+        }
 
         dispatch(createPost(postData));
         clear();
